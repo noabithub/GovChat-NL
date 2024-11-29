@@ -20,12 +20,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Stap 3: Dependencies installeren
+      # Stap 3: Dependencies installeren vanuit /app/backend/requirements.txt
       - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
+          pip install -r app/backend/requirements.txt  # Pad naar requirements.txt aangepast
         
       # Stap 4: (Optioneel) Tests draaien
       - name: Run tests
@@ -72,7 +72,7 @@ jobs:
           echo "AZURE_OPENAI_SERVICE=${{ secrets.AZURE_OPENAI_SERVICE }}" >> $GITHUB_ENV
           echo "AZURE_KEY_VAULT_NAME=${{ secrets.AZURE_KEY_VAULT_NAME }}" >> $GITHUB_ENV
 
-      # Stap 10: Deploy naar het ontwikkelingsslot
+      # Stap 10: Deploy naar Azure Web App Slot
       - name: Deploy to Azure Web App Slot
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
