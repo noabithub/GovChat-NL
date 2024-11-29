@@ -14,25 +14,33 @@ jobs:
       # Stap 1: Checkout de code
       - uses: actions/checkout@v4
 
-      # Stap 2: Python versie instellen
+      # Stap 2: Set up Azure login
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      # Stap 3: Python versie instellen
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Stap 3: Dependencies installeren vanuit /app/backend/requirements.txt
+      # Stap 4: Dependencies installeren vanuit /app/backend/requirements.txt
       - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -r app/backend/requirements.txt  # Installeert alle dependencies
 
-      # Stap 4: Artefact klaarmaken voor deployment
+      # Stap 5: Artefact klaarmaken voor deployment
       - name: Prepare artifact for deployment
         run: |
           zip -r release.zip . -x "venv/*" "*.git*" ".*" "__pycache__/*"
 
-      # Stap 5: Artefact uploaden
+      # Stap 6: Artefact uploaden
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
@@ -47,17 +55,17 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      # Stap 6: Artefact downloaden van de build job
+      # Stap 7: Artefact downloaden van de build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      # Stap 7: Artefact uitpakken
+      # Stap 8: Artefact uitpakken
       - name: Unzip artifact
         run: unzip release.zip
 
-      # Stap 8: Omgevingsvariabelen instellen
+      # Stap 9: Omgevingsvariabelen instellen
       - name: Set environment variables
         run: |
           echo "AZURE_APP_SERVICE=${{ secrets.AZURE_APP_SERVICE }}" >> $GITHUB_ENV
@@ -66,7 +74,7 @@ jobs:
           echo "AZURE_OPENAI_SERVICE=${{ secrets.AZURE_OPENAI_SERVICE }}" >> $GITHUB_ENV
           echo "AZURE_KEY_VAULT_NAME=${{ secrets.AZURE_KEY_VAULT_NAME }}" >> $GITHUB_ENV
 
-      # Stap 9: Deploy naar Azure Web App Slot
+      # Stap 10: Deploy naar Azure Web App Slot
       - name: Deploy to Azure Web App Slot
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
