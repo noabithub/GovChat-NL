@@ -25,20 +25,14 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r app/backend/requirements.txt  # Pad naar requirements.txt aangepast
-        
-      # Stap 4: (Optioneel) Tests draaien
-      - name: Run tests
-        run: |
-          source venv/bin/activate
-          pytest  # Voeg hier je tests aan toe als je die hebt
+          pip install -r app/backend/requirements.txt  # Installeert alle dependencies
 
-      # Stap 5: Artefact klaarmaken voor deployment
+      # Stap 4: Artefact klaarmaken voor deployment
       - name: Prepare artifact for deployment
         run: |
           zip -r release.zip . -x "venv/*" "*.git*" ".*" "__pycache__/*"
 
-      # Stap 6: Artefact uploaden
+      # Stap 5: Artefact uploaden
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
@@ -53,17 +47,17 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-      # Stap 7: Artefact downloaden van de build job
+      # Stap 6: Artefact downloaden van de build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      # Stap 8: Artefact uitpakken
+      # Stap 7: Artefact uitpakken
       - name: Unzip artifact
         run: unzip release.zip
 
-      # Stap 9: Omgevingsvariabelen instellen
+      # Stap 8: Omgevingsvariabelen instellen
       - name: Set environment variables
         run: |
           echo "AZURE_APP_SERVICE=${{ secrets.AZURE_APP_SERVICE }}" >> $GITHUB_ENV
@@ -72,7 +66,7 @@ jobs:
           echo "AZURE_OPENAI_SERVICE=${{ secrets.AZURE_OPENAI_SERVICE }}" >> $GITHUB_ENV
           echo "AZURE_KEY_VAULT_NAME=${{ secrets.AZURE_KEY_VAULT_NAME }}" >> $GITHUB_ENV
 
-      # Stap 10: Deploy naar Azure Web App Slot
+      # Stap 9: Deploy naar Azure Web App Slot
       - name: Deploy to Azure Web App Slot
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
