@@ -1,6 +1,6 @@
 const BACKEND_URI = "";
 
-import { ChatAppResponse, ChatAppResponseOrError, ChatAppRequest, Config, SimpleAPIResponse } from "./models";
+import { ChatAppResponse, ChatAppResponseOrError, ChatAppRequest, Config, SimpleAPIResponse, ReadFileResult } from "./models";
 import { useLogin, getToken, isUsingAppServicesLogin } from "../authConfig";
 
 export async function getHeaders(idToken: string | undefined): Promise<Record<string, string>> {
@@ -125,4 +125,21 @@ export async function listUploadedFilesApi(idToken: string): Promise<string[]> {
 
     const dataResponse: string[] = await response.json();
     return dataResponse;
+}
+
+export async function readFile(file: File): Promise<ReadFileResult> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`/b1_upload`, {
+        method: "POST",
+        body: formData
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result as ReadFileResult;
 }

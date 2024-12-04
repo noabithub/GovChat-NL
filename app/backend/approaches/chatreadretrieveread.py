@@ -55,10 +55,58 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """Assistant helps the company employees with their healthcare plan questions, and questions about the employee handbook. Be brief in your answers.
-        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
-        If the question is not in English, answer in the language used in the question.
-        Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
+        return """
+        Je bent de Limburgse AI Chat Assistent (LAICA), een geavanceerde AI-assistent ontwikkeld voor ambtenaren bij de Provincie Limburg. Je functie is om efficiënte, accurate en neutrale ondersteuning te bieden.
+
+        Kernprincipes
+        Taalgebruik: Communiceer standaard in het Nederlands, tenzij expliciet anders gevraagd.
+        Status: Je bevindt je in de testfase en bent beperkt beschikbaar.
+        Neutraliteit: Blijf altijd neutraal en vermijd politieke of ideologische uitspraken.
+        Gegevensbescherming: Waarschuw bij het delen van bijzondere of gevoelige persoonsgegevens en benadruk privacy.
+        Ondersteuning: Herinner gebruikers eraan dat je een AI-assistent bent, ontworpen om te ondersteunen maar niet om menselijke expertise of besluitvorming te vervangen.
+
+        Interfacegids
+        Linksboven: Bekijk chathistorie of start een nieuwe chat.
+        Rechtsboven: Selecteer de kennisbank, upload bestanden, of bekijk instructies.
+
+        Werking LAICA
+        Technologie: Gebaseerd op GPT-4o, binnen een veilige en afgesloten omgeving van de Provincie Limburg.
+        Tekstverwerking:
+        LAICA ondersteunt gebruikers bij het kiezen van de beste aanpak voor hun vraag of opdracht:
+
+        Directe invoer in de chat:
+        Geschikt voor:
+        - Het samenvatten van documenten.
+        - Het vergelijken van meerdere teksten.
+        - Algemene of uitgebreide analyses op basis van een volledige tekst.
+        Waarom?
+        Bij directe invoer analyseert LAICA de tekst in zijn geheel, wat zorgt voor een meer samenhangende en nauwkeurige interpretatie.
+
+
+        Uploaden van bestanden naar de kennisbank:
+        Geschikt voor:
+        - Het vinden van specifieke informatie, zoals details of antwoorden op gerichte vragen.
+        - Het doorzoeken van lange documenten waarin je gerichte inzichten wilt ophalen.
+        Waarom?
+        Geüploade documenten worden automatisch in kleine fragmenten (‘chunks’) opgedeeld. Dit is efficiënt voor het zoeken naar specifieke details, maar minder geschikt voor globale analyses of samenvattingen omdat slechts een deel van het document tegelijk toegankelijk is.
+        Let op: Je kunt de geüploade bestanden pas bevragen als je bij kennisbank "Mijn uploads" selecteert.
+
+        Zwakte:
+        Feitelijke informatie die niet gebaseerd is op een bron uit de kennisbank kan soms onjuist of onnauwkeurig zijn. Bij twijfel, raadpleeg een betrouwbare bron of een collega.
+
+        Gedrag bij begroeting:
+        Wanneer een gebruiker alleen een begroeting stuurt, geef een korte uitleg over wat LAICA is en hoe het werkt. Bespreek de technologie (taalmodel, afgesloten omgeving), het gebruik van kennisbanken (inclusief de mogelijkheid om bestanden te uploaden), en de gebruikersinterface.
+
+        Feedback op prompting:
+        Geef korte, constructieve feedback over hoe de vraagstelling verbeterd kan worden als dat een significant beter antwoord oplevert, maar doseer dit om te voorkomen dat het irritant wordt voor de gebruiker.
+
+        Contact
+        Voor vragen of suggesties: AI@prvlimburg.nl
+
+        Methodologie:
+        Benader elke vraag methodisch en grondig. Neem de tijd om stapsgewijs te redeneren en overweeg alle aspecten zorgvuldig om tot een weloverwogen en nauwkeurig antwoord te komen.
+
+        {sources_reference_content}
         {follow_up_questions_prompt}
         {injected_prompt}
         """
@@ -81,84 +129,23 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         should_stream: Literal[True],
     ) -> tuple[dict[str, Any], Coroutine[Any, Any, AsyncStream[ChatCompletionChunk]]]: ...
 
-    async def run_until_final_call(
-        self,
-        messages: list[ChatCompletionMessageParam],
-        overrides: dict[str, Any],
-        auth_claims: dict[str, Any],
-        should_stream: bool = False,
-    ) -> tuple[dict[str, Any], Coroutine[Any, Any, Union[ChatCompletion, AsyncStream[ChatCompletionChunk]]]]:
-        seed = overrides.get("seed", None)
+    async def apply_rag(
+        self, original_user_query: str, overrides: dict[str, Any], auth_claims: dict[str, Any]
+    ) -> tuple[str, dict[str, Any]]:
         use_text_search = overrides.get("retrieval_mode") in ["text", "hybrid", None]
         use_vector_search = overrides.get("retrieval_mode") in ["vectors", "hybrid", None]
-        use_semantic_ranker = True if overrides.get("semantic_ranker") else False
-        use_semantic_captions = True if overrides.get("semantic_captions") else False
+        use_semantic_ranker = overrides.get("semantic_ranker", False)
+        use_semantic_captions = overrides.get("semantic_captions", False)
         top = overrides.get("top", 3)
-        minimum_search_score = overrides.get("minimum_search_score", 0.0)
+        minimum_search_score = overrides.get("minimum_search_score", 0.2)
         minimum_reranker_score = overrides.get("minimum_reranker_score", 0.0)
         filter = self.build_filter(overrides, auth_claims)
 
-        original_user_query = messages[-1]["content"]
-        if not isinstance(original_user_query, str):
-            raise ValueError("The most recent message content must be a string.")
-        user_query_request = "Generate search query for: " + original_user_query
-
-        tools: List[ChatCompletionToolParam] = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "search_sources",
-                    "description": "Retrieve sources from the Azure AI Search index",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "search_query": {
-                                "type": "string",
-                                "description": "Query string to retrieve documents from azure search eg: 'Health care plan'",
-                            }
-                        },
-                        "required": ["search_query"],
-                    },
-                },
-            }
-        ]
-
-        # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
-        query_response_token_limit = 100
-        query_messages = build_messages(
-            model=self.chatgpt_model,
-            system_prompt=self.query_prompt_template,
-            tools=tools,
-            few_shots=self.query_prompt_few_shots,
-            past_messages=messages[:-1],
-            new_user_content=user_query_request,
-            max_tokens=self.chatgpt_token_limit - query_response_token_limit,
-            fallback_to_default=self.ALLOW_NON_GPT_MODELS,
-        )
-
-        chat_completion: ChatCompletion = await self.openai_client.chat.completions.create(
-            messages=query_messages,  # type: ignore
-            # Azure OpenAI takes the deployment name as the model name
-            model=self.chatgpt_deployment if self.chatgpt_deployment else self.chatgpt_model,
-            temperature=0.0,  # Minimize creativity for search query generation
-            max_tokens=query_response_token_limit,  # Setting too low risks malformed JSON, setting too high may affect performance
-            n=1,
-            tools=tools,
-            seed=seed,
-        )
-
-        query_text = self.get_search_query(chat_completion, original_user_query)
-
-        # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
-
-        # If retrieval mode includes vectors, compute an embedding for the query
-        vectors: list[VectorQuery] = []
-        if use_vector_search:
-            vectors.append(await self.compute_text_embedding(query_text))
+        vectors = [await self.compute_text_embedding(original_user_query)]
 
         results = await self.search(
             top,
-            query_text,
+            original_user_query,
             filter,
             vectors,
             use_text_search,
@@ -172,12 +159,53 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)
 
-        # STEP 3: Generate a contextual and content specific answer using the search results and chat history
+        extra_info = {
+            "data_points": {"text": sources_content},
+            "thoughts": [
+                ThoughtStep(
+                    "Search results",
+                    [result.serialize_for_results() for result in results],
+                )
+            ],
+        }
 
-        # Allow client to replace the entire prompt, or to inject into the exiting prompt using >>>
+        return content, extra_info
+
+    async def run_until_final_call(
+        self,
+        messages: list[ChatCompletionMessageParam],
+        overrides: dict[str, Any],
+        auth_claims: dict[str, Any],
+        should_stream: bool = False,
+    ) -> tuple[dict[str, Any], Coroutine[Any, Any, Union[ChatCompletion, AsyncStream[ChatCompletionChunk]]]]:
+        seed = overrides.get("seed", None)
+
+        original_user_query = messages[-1]["content"]
+        if not isinstance(original_user_query, str):
+            raise ValueError("The most recent message content must be a string.")
+
+        apply_rag = overrides.get("include_category") != "__NONE__"
+        content = ""
+        extra_info = {"thoughts": [], "data_points": []}
+
+        sources_reference_content = (
+            """
+        De chatbot mag alleen antwoorden op basis van de opgehaalde bronnen uit de geselecteerde kennisbank.
+        Elke bron heeft een naam gevolgd door een dubbele punt en de daadwerkelijke informatie. Vermeld altijd de naam van de bron voor elk feit dat je gebruikt in je antwoord. Gebruik vierkante haken om naar de bron te verwijzen, bijvoorbeeld [info1.txt]. Combineer bronnen niet; vermeld elke bron apart, bijvoorbeeld [info1.txt][info2.pdf].
+        Als de benodigde informatie niet beschikbaar is in de geselecteerde kennisbank, geeft de chatbot aan dat hij het niet kan beantwoorden op basis van de beschikbare bronnen.
+        """
+            if apply_rag
+            else ""
+        )
+
+        if apply_rag:
+            content, rag_extra_info = await self.apply_rag(original_user_query, overrides, auth_claims)
+            extra_info.update(rag_extra_info)
+
         system_message = self.get_system_prompt(
             overrides.get("prompt_template"),
             self.follow_up_questions_prompt_content if overrides.get("suggest_followup_questions") else "",
+            sources_reference_content=sources_reference_content,
         )
 
         response_token_limit = 1024
@@ -185,56 +213,24 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             model=self.chatgpt_model,
             system_prompt=system_message,
             past_messages=messages[:-1],
-            # Model does not handle lengthy system messages well. Moving sources to latest user conversation to solve follow up questions prompt.
-            new_user_content=original_user_query + "\n\nSources:\n" + content,
+            new_user_content=original_user_query + ("\n\nSources:\n" + content if content else ""),
             max_tokens=self.chatgpt_token_limit - response_token_limit,
             fallback_to_default=self.ALLOW_NON_GPT_MODELS,
         )
 
-        data_points = {"text": sources_content}
-
-        extra_info = {
-            "data_points": data_points,
-            "thoughts": [
-                ThoughtStep(
-                    "Prompt to generate search query",
-                    query_messages,
-                    (
-                        {"model": self.chatgpt_model, "deployment": self.chatgpt_deployment}
-                        if self.chatgpt_deployment
-                        else {"model": self.chatgpt_model}
-                    ),
+        extra_info["thoughts"].append(
+            ThoughtStep(
+                "Prompt to generate answer",
+                messages,
+                (
+                    {"model": self.chatgpt_model, "deployment": self.chatgpt_deployment}
+                    if self.chatgpt_deployment
+                    else {"model": self.chatgpt_model}
                 ),
-                ThoughtStep(
-                    "Search using generated search query",
-                    query_text,
-                    {
-                        "use_semantic_captions": use_semantic_captions,
-                        "use_semantic_ranker": use_semantic_ranker,
-                        "top": top,
-                        "filter": filter,
-                        "use_vector_search": use_vector_search,
-                        "use_text_search": use_text_search,
-                    },
-                ),
-                ThoughtStep(
-                    "Search results",
-                    [result.serialize_for_results() for result in results],
-                ),
-                ThoughtStep(
-                    "Prompt to generate answer",
-                    messages,
-                    (
-                        {"model": self.chatgpt_model, "deployment": self.chatgpt_deployment}
-                        if self.chatgpt_deployment
-                        else {"model": self.chatgpt_model}
-                    ),
-                ),
-            ],
-        }
+            )
+        )
 
         chat_coroutine = self.openai_client.chat.completions.create(
-            # Azure OpenAI takes the deployment name as the model name
             model=self.chatgpt_deployment if self.chatgpt_deployment else self.chatgpt_model,
             messages=messages,
             temperature=overrides.get("temperature", 0.3),

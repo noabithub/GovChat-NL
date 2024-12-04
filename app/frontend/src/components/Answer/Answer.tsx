@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Stack, IconButton } from "@fluentui/react";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
@@ -46,6 +46,20 @@ export const Answer = ({
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer, isStreaming, onCitationClicked), [answer]);
     const { t } = useTranslation();
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        // Single replace to remove all HTML tags, including numbers within <sup> tags in <a> elements
+        const textToCopy = sanitizedAnswerHtml.replace(/<a [^>]*><sup>\d+<\/sup><\/a>|<[^>]+>/g, "");
+
+        navigator.clipboard
+            .writeText(textToCopy)
+            .then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            })
+            .catch(err => console.error("Failed to copy text: ", err));
+    };
 
     return (
         <Stack className={`${styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
@@ -54,6 +68,13 @@ export const Answer = ({
                     <AnswerIcon />
                     <div>
                         <IconButton
+                            style={{ color: "black" }}
+                            iconProps={{ iconName: copied ? "CheckMark" : "Copy" }}
+                            title={copied ? t("tooltips.copied") : t("tooltips.copy")}
+                            ariaLabel={copied ? t("tooltips.copied") : t("tooltips.copy")}
+                            onClick={handleCopy}
+                        />
+                        {/* <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}
                             title={t("tooltips.showThoughtProcess")}
@@ -68,7 +89,7 @@ export const Answer = ({
                             ariaLabel={t("tooltips.showSupportingContent")}
                             onClick={() => onSupportingContentClicked()}
                             disabled={!answer.context.data_points}
-                        />
+                        /> */}
                         {showSpeechOutputAzure && (
                             <SpeechOutputAzure answer={sanitizedAnswerHtml} index={index} speechConfig={speechConfig} isStreaming={isStreaming} />
                         )}

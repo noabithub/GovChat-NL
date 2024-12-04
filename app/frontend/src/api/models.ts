@@ -104,3 +104,8 @@ export interface SpeechConfig {
     isPlaying: boolean;
     setIsPlaying: (isPlaying: boolean) => void;
 }
+
+export interface ReadFileResult {
+    original_content: string;
+    simplified_content: string;
+}

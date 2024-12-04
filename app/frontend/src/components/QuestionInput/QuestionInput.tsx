@@ -59,13 +59,13 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, init
     const onQuestionChange = (_ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
         if (!newValue) {
             setQuestion("");
-        } else if (newValue.length <= 1000) {
+        } else if (newValue.length <= 1000000) {
             setQuestion(newValue);
         }
     };
 
     const disableRequiredAccessControl = requireLogin && !loggedIn;
-    const sendQuestionDisabled = disabled || !question.trim() || requireLogin;
+    const sendQuestionDisabled = disabled || !question.trim();
 
     if (disableRequiredAccessControl) {
         placeholder = "Please login to continue...";

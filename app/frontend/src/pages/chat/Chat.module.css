@@ -3,42 +3,83 @@
     display: flex;
     flex-direction: column;
     margin-top: 1rem;
+    position: relative;
 }
 
 .chatRoot {
     flex: 1;
     display: flex;
+    justify-content: center;
 }
-
+/*
 .chatContainer {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-height: calc(100vh - 10rem);
+    width: 70%;
+    max-width: 70rem;
+    max-height: calc(100vh - 6.75rem);
+    padding-bottom: 6.75rem;
+} */
+
+.chatContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column; /* Plaatst items in een kolom */
+    justify-content: flex-end; /* Duwt de chatInput naar de onderkant */
+    height: 100vh; /* Zorgt ervoor dat de container de volledige schermhoogte inneemt */
+    margin: 0; /* Verwijdert eventuele marges */
+    box-sizing: border-box; /* Houdt rekening met padding/borders */
+    max-width: 70rem;
+    max-height: calc(100vh - 6.75rem);
 }
 
 .chatEmptyState {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    max-height: 64rem;
-    padding-top: 1rem;
+    /* min-height: 80vh; */
+    /* padding: 2rem; */
+    margin-bottom: 5%;
+    box-sizing: border-box;
+}
+
+.chatEmptyStateHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.chatEmptyStateHeader img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1rem; /* Ruimte tussen logo en titel */
 }
 
 .chatEmptyStateTitle {
-    font-size: 2.75rem;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 1.875rem;
+    font-size: 2.5rem; /* Grotere titel voor zichtbaarheid */
+    font-weight: 650;
+    color: #333;
+    margin: 0 0 1rem 0; /* Ruimte onder de titel voor de subtitel */
 }
 
 .chatEmptyStateSubtitle {
-    font-weight: 600;
-    margin-bottom: 0.625rem;
+    font-size: 1.5rem; /* Iets grotere subtitel */
+    font-weight: 400;
+    color: #666;
+    margin: 0; /* Geen extra marges voor consistentie */
+}
+
+.chatEmptyStateContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    margin-top: 1.5rem;
 }
 
 .chatMessageStream {
@@ -49,7 +90,6 @@
     padding: 0 2rem;
     display: flex;
     flex-direction: column;
-    resize: horizontal;
     min-width: 50vw;
 }
 
@@ -65,21 +105,35 @@
 }
 
 .chatInput {
-    position: sticky;
+    position: relative;
     bottom: 0;
-    flex: 0 0 6.25rem;
-    padding: 1rem;
-    width: 100%;
+    width: 80%;
     max-width: 64.25rem;
+    padding: 1rem;
     background: #f2f2f2;
+    box-sizing: border-box;
+    align-self: center;
 }
 
+/* left: 50%;
+    transform: translateX(-50%); */
+
 .chatAnalysisPanel {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
     max-height: 85vh;
     margin-left: 1.25rem;
     margin-right: 1.25rem;
+}
+
+.iconButtonWrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -20px; /* Pas dit aan om de exacte positie van de knop te bepalen */
+    display: flex;
+    align-items: center;
+    z-index: 1; /* Zorg ervoor dat de knop boven andere elementen komt */
 }
 
 .chatSettingsSeparator {
@@ -95,6 +149,7 @@
 .commandsSplitContainer {
     display: flex;
     justify-content: space-between;
+    z-index: 1000;
 }
 
 .commandsContainer {
@@ -102,6 +157,7 @@
     padding-left: 1rem;
     padding-right: 1rem;
     align-self: flex-end;
+    z-index: 1000;
 }
 
 .commandButton {
@@ -110,7 +166,7 @@
 
 @media (min-width: 992px) {
     .container {
-        margin-top: 1.25rem;
+        margin-top: 1rem;
     }
 
     .chatEmptyState {
@@ -118,7 +174,12 @@
     }
 
     .chatEmptyStateTitle {
-        font-size: 4rem;
+        font-size: 2.5rem;
+    }
+
+    .chatEmptyStateHeader img {
+        width: 100px;
+        height: 100px;
     }
 
     .chatInput {
@@ -142,5 +203,30 @@
     .chatMessageGpt {
         max-width: 80%;
         min-width: 31.25rem;
+    }
+
+    .disclaimerText {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 10px;
+        font-size: 0.8rem;
+        color: #666;
+        z-index: 1000;
+    }
+
+    .chatAnalysisPanelContainer {
+        position: relative;
+        display: flex;
+        height: 100vh;
+    }
+
+    .collapsePanelButton {
+        position: absolute;
+        left: -32px;
+        top: 8px;
+        z-index: 1;
     }
 }
