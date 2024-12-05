@@ -21,23 +21,23 @@ urlFragment: azure-search-openai-demo
 
 ## Overzicht
 
-GovChat-NL is een initiatief van de Provincie Limburg en wordt uitgevoerd binnen het Interprovinciaal Overleg Data Science (PODS). Het project is een Nederlandse overheidsgerichte fork van de [azure-search-openai-demo](https://github.com/azure-samples/azure-search-openai-demo) en integreert ChatGPT-achtige vraag-en-antwoordfunctionaliteit met een app launcher voor toepassingen die gebruikmaken van Large Language Models (LLM). Dit is ontworpen voor veilig en gedeeld gebruik binnen de publieke sector.
+GovChat-NL is een initiatief van de Provincie Limburg, uitgevoerd binnen het Interprovinciaal Overleg Data Science (PODS). Het project is een Nederlandse overheidsgerichte fork van de [azure-search-openai-demo](https://github.com/azure-samples/azure-search-openai-demo) en integreert ChatGPT-achtige vraag-en-antwoordfunctionaliteit met een App Launcher voor toepassingen die gebruikmaken van Large Language Models (LLM). Het is ontworpen voor veilig en gedeeld gebruik binnen de publieke sector.
 
-## Filosofie
+## Vooruitblik
 
-Het project streeft ernaar om een ecosysteem te creëren voor AI-toepassingen dat flexibel en toegankelijk is voor verschillende overheidsinstanties. Dankzij de Infrastructure-as-Code aanpak kunnen organisaties eenvoudig aanhaken en deelnemen aan de ontwikkeling. Momenteel is de infrastructuur gebaseerd op Microsoft Azure, maar het voornemen is om de verschillende componenten van de applicatie bij diverse leveranciers af te kunnen nemen. Dit biedt flexibiliteit en keuzevrijheid binnen het ecosysteem van AI-toepassingen.
+GovChat-NL streeft naar een flexibel en toegankelijk ecosysteem voor AI-toepassingen binnen overheidsinstanties. Met een Infrastructure-as-Code aanpak kunnen organisaties eenvoudig gebruik maken van de reeds ontwikkelde software. Hoewel de infrastructuur momenteel op Microsoft Azure is gebaseerd, is het doel om componenten bij diverse leveranciers af te nemen, wat flexibiliteit en keuzevrijheid biedt. Binnen de Provincie Limburg wordt gewerkt aan een Data Privacy Impact Assessment (DPIA) en een Impact Assessment Mensen en Algoritmes (IAMA), die in deze repository gedeeld zullen worden. Andere overheden kunnen deze assessments overnemen. Elke AI-toepassing die aan de app launcher wordt toegevoegd, moet zijn eigen DPIA/IAMA aanleveren, zodat organisaties goed voorbereid zijn om de app te gebruiken.
 
 ## Projecttab: GovChatNL-DevPath
 
-Het projecttabblad "GovChatNL-DevPath" verdeelt taken over verschillende deelnemende overheden, maar staat ook open voor bijdragen van niet-overheidsorganisaties. Dit bevordert een gestructureerde samenwerking en maakt het mogelijk voor diverse partijen om bij te dragen aan de ontwikkeling van innovatieve AI-oplossingen.
+Het projecttabblad "GovChatNL-DevPath" verdeelt taken over deelnemende overheden en staat open voor bijdragen van niet-overheidsorganisaties. Dit bevordert gestructureerde samenwerking en stelt diverse partijen in staat om parallel bij te dragen aan de ontwikkeling van innovatieve AI-oplossingen.
 
 ## Bijdragen
 
-We nodigen ontwikkelaars, onderzoekers en andere belanghebbenden uit om bij te dragen aan GovChat-NL. Of je nu een overheidsinstantie bent of een externe partner, je bijdrage is welkom om de toekomst van AI in de publieke sector vorm te geven.
+We nodigen iedereen uit om bij te dragen aan GovChat-NL. Of je nu een overheidsinstantie bent of een private partij, georganiseerd of niet, je bijdrage is welkom om de toekomst van AI in de publieke sector vorm te geven.
 
 ## Overgang naar Upstream Documentatie
 
-Voor een gedetailleerd begrip van de technische basis en de mogelijkheden van de onderliggende technologieën, verwijzen we naar de documentatie van de basisrepository hieronder. Deze biedt inzicht in de architectuur en functionaliteit die ten grondslag liggen aan GovChat-NL.
+Voor een diepgaand begrip van de technische basis en mogelijkheden van de onderliggende technologieën, verwijzen we naar de documentatie van de basisrepository hieronder.
 
 # RAG chat app with Azure OpenAI and Azure AI Search (Python)
 
