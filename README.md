@@ -35,6 +35,9 @@ Het projecttabblad "GovChatNL-DevPath" verdeelt taken over verschillende deelnem
 
 We nodigen ontwikkelaars, onderzoekers en andere belanghebbenden uit om bij te dragen aan GovChat-NL. Of je nu een overheidsinstantie bent of een externe partner, je bijdrage is welkom om de toekomst van AI in de publieke sector vorm te geven.
 
+## Overgang naar Upstream Documentatie
+
+Voor een gedetailleerd begrip van de technische basis en de mogelijkheden van de onderliggende technologieën, verwijzen we naar de documentatie van de basisrepository hieronder. Deze biedt inzicht in de architectuur en functionaliteit die ten grondslag liggen aan GovChat-NL.
 
 # RAG chat app with Azure OpenAI and Azure AI Search (Python)
 
