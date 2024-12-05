@@ -91,6 +91,7 @@ const Chat = () => {
     const [showSpeechOutputBrowser, setShowSpeechOutputBrowser] = useState<boolean>(false);
     const [showSpeechOutputAzure, setShowSpeechOutputAzure] = useState<boolean>(false);
     const [showChatHistoryBrowser, setShowChatHistoryBrowser] = useState<boolean>(false);
+    const [showChatHistoryCosmos, setShowChatHistoryCosmos] = useState<boolean>(false);
     const audio = useRef(new Audio()).current;
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -117,6 +118,7 @@ const Chat = () => {
             setShowSpeechOutputBrowser(config.showSpeechOutputBrowser);
             setShowSpeechOutputAzure(config.showSpeechOutputAzure);
             setShowChatHistoryBrowser(config.showChatHistoryBrowser);
+            setShowChatHistoryCosmos(config.showChatHistoryCosmos);
         });
     };
 
@@ -166,7 +168,11 @@ const Chat = () => {
     const client = useLogin ? useMsal().instance : undefined;
     const { loggedIn } = useContext(LoginContext);
 
-    const historyProvider: HistoryProviderOptions = showChatHistoryBrowser ? HistoryProviderOptions.IndexedDB : HistoryProviderOptions.None;
+    const historyProvider: HistoryProviderOptions = (() => {
+        if (useLogin && showChatHistoryCosmos) return HistoryProviderOptions.CosmosDB;
+        if (showChatHistoryBrowser) return HistoryProviderOptions.IndexedDB;
+        return HistoryProviderOptions.None;
+    })();
     const historyManager = useHistoryManager(historyProvider);
 
     const makeApiRequest = async (question: string) => {
@@ -224,7 +230,8 @@ const Chat = () => {
                 const parsedResponse: ChatAppResponse = await handleAsyncRequest(question, answers, response.body);
                 setAnswers([...answers, [question, parsedResponse]]);
                 if (typeof parsedResponse.session_state === "string" && parsedResponse.session_state !== "") {
-                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, parsedResponse]]);
+                    const token = client ? await getToken(client) : undefined;
+                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, parsedResponse]], token);
                 }
             } else {
                 const parsedResponse: ChatAppResponseOrError = await response.json();
@@ -233,7 +240,8 @@ const Chat = () => {
                 }
                 setAnswers([...answers, [question, parsedResponse as ChatAppResponse]]);
                 if (typeof parsedResponse.session_state === "string" && parsedResponse.session_state !== "") {
-                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, parsedResponse as ChatAppResponse]]);
+                    const token = client ? await getToken(client) : undefined;
+                    historyManager.addItem(parsedResponse.session_state, [...answers, [question, parsedResponse as ChatAppResponse]], token);
                 }
             }
             setSpeechUrls([...speechUrls, null]);
@@ -356,8 +364,8 @@ const Chat = () => {
             </Helmet>
             <div className={styles.commandsSplitContainer} style={{ marginLeft: isHistoryPanelOpen ? "300px" : "0" }}>
                 <div className={styles.commandsContainer}>
-                    {showChatHistoryBrowser && !isHistoryPanelOpen && (
-                        <HistoryButton className={styles.commandButton} onClick={() => setIsHistoryPanelOpen(true)} />
+                    {((useLogin && showChatHistoryCosmos) || showChatHistoryBrowser) && (
+                        <HistoryButton className={styles.commandButton} onClick={() => setIsHistoryPanelOpen(!isHistoryPanelOpen)} />
                     )}
                     <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                 </div>
@@ -476,7 +484,7 @@ const Chat = () => {
                     />
                 )}
 
-                {showChatHistoryBrowser && (
+                {((useLogin && showChatHistoryCosmos) || showChatHistoryBrowser) && (
                     <HistoryPanel
                         provider={historyProvider}
                         isOpen={isHistoryPanelOpen}

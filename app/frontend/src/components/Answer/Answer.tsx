@@ -49,7 +49,7 @@ export const Answer = ({
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
-        // Single replace to remove all HTML tags, including numbers within <sup> tags in <a> elements
+        // Single replace to remove all HTML tags to remove the citations
         const textToCopy = sanitizedAnswerHtml.replace(/<a [^>]*><sup>\d+<\/sup><\/a>|<[^>]+>/g, "");
 
         navigator.clipboard
@@ -74,6 +74,7 @@ export const Answer = ({
                             ariaLabel={copied ? t("tooltips.copied") : t("tooltips.copy")}
                             onClick={handleCopy}
                         />
+
                         {/* <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}

@@ -91,6 +91,7 @@ export type Config = {
     showSpeechOutputBrowser: boolean;
     showSpeechOutputAzure: boolean;
     showChatHistoryBrowser: boolean;
+    showChatHistoryCosmos: boolean;
 };
 
 export type SimpleAPIResponse = {
@@ -109,3 +110,21 @@ export interface ReadFileResult {
     original_content: string;
     simplified_content: string;
 }
+
+export type HistoryListApiResponse = {
+    items: {
+        id: string;
+        entra_oid: string;
+        title: string;
+        timestamp: number;
+    }[];
+    continuation_token?: string;
+};
+
+export type HistroyApiResponse = {
+    id: string;
+    entra_oid: string;
+    title: string;
+    answers: any;
+    timestamp: number;
+};

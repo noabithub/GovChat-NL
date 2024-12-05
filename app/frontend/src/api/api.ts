@@ -1,6 +1,7 @@
 const BACKEND_URI = "";
 
-import { ChatAppResponse, ChatAppResponseOrError, ChatAppRequest, Config, SimpleAPIResponse, ReadFileResult } from "./models";
+
+import { ChatAppResponse, ChatAppResponseOrError, ChatAppRequest, Config, SimpleAPIResponse, ReadFileResult, HistoryListApiResponse, HistroyApiResponse } from "./models";
 import { useLogin, getToken, isUsingAppServicesLogin } from "../authConfig";
 
 export async function getHeaders(idToken: string | undefined): Promise<Record<string, string>> {
@@ -126,6 +127,69 @@ export async function listUploadedFilesApi(idToken: string): Promise<string[]> {
     const dataResponse: string[] = await response.json();
     return dataResponse;
 }
+
+export async function postChatHistoryApi(item: any, idToken: string): Promise<any> {
+    const headers = await getHeaders(idToken);
+    const response = await fetch("/chat_history", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(item)
+    });
+
+    if (!response.ok) {
+        throw new Error(`Posting chat history failed: ${response.statusText}`);
+    }
+
+    const dataResponse: any = await response.json();
+    return dataResponse;
+}
+
+export async function getChatHistoryListApi(count: number, continuationToken: string | undefined, idToken: string): Promise<HistoryListApiResponse> {
+    const headers = await getHeaders(idToken);
+    const response = await fetch("/chat_history/items", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ count: count, continuation_token: continuationToken })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Getting chat histories failed: ${response.statusText}`);
+    }
+
+    const dataResponse: HistoryListApiResponse = await response.json();
+    return dataResponse;
+}
+
+export async function getChatHistoryApi(id: string, idToken: string): Promise<HistroyApiResponse> {
+    const headers = await getHeaders(idToken);
+    const response = await fetch(`/chat_history/items/${id}`, {
+        method: "GET",
+        headers: { ...headers, "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Getting chat history failed: ${response.statusText}`);
+    }
+
+    const dataResponse: HistroyApiResponse = await response.json();
+    return dataResponse;
+}
+
+export async function deleteChatHistoryApi(id: string, idToken: string): Promise<any> {
+    const headers = await getHeaders(idToken);
+    const response = await fetch(`/chat_history/items/${id}`, {
+        method: "DELETE",
+        headers: { ...headers, "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Deleting chat history failed: ${response.statusText}`);
+    }
+
+    const dataResponse: any = await response.json();
+    return dataResponse;
+}
+
 
 export async function readFile(file: File): Promise<ReadFileResult> {
     const formData = new FormData();
