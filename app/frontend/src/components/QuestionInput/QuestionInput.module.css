@@ -6,6 +6,20 @@
     width: 100%;
     padding: 0.8rem;
     background: white;
+    position: relative;
+    padding-bottom: calc(0.8rem + 0.5rem); /* Increased padding at the bottom */
+}
+
+.questionInputContainer::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0.25rem;
+    background: linear-gradient(to right, #e8b028, #0663a5);
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
 }
 
 .questionInputTextArea {

@@ -297,6 +297,7 @@ export function Component(): JSX.Element {
                         citationHeight="600px"
                         answer={answer}
                         activeTab={activeAnalysisPanelTab}
+                        onClose={() => setActiveAnalysisPanelTab(undefined)}
                     />
                 )}
             </div>

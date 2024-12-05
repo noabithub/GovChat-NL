@@ -11,6 +11,9 @@ import Chat from "./pages/chat/Chat";
 import LayoutWrapper from "./layoutWrapper";
 import i18next from "./i18n/config";
 
+// Importeer de B1Taalniveau component
+import B1Taalniveau from "./pages/b1-taalniveau/b1-taalniveau";
+
 initializeIcons();
 
 const router = createHashRouter([
@@ -25,6 +28,10 @@ const router = createHashRouter([
             {
                 path: "qa",
                 lazy: () => import("./pages/ask/Ask")
+            },
+            {
+                path: "b1-taalniveau",
+                element: <B1Taalniveau />
             },
             {
                 path: "*",

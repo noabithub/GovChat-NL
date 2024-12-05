@@ -1,11 +1,11 @@
 {
-    "pageTitle": "Azure OpenAI + AI Search",
-    "headerTitle": "Azure OpenAI + AI Search",
+    "pageTitle": "Laica",
+    "headerTitle": "Laica",
     "chat": "Chat",
     "qa": "Stel een vraag",
     "login": "Inloggen",
     "logout": "Uitloggen",
-    "clearChat": "Chat wissen",
+    "clearChat": "Nieuwe chat",
     "history": {
         "chatHistory": "Chatgeschiedenis",
         "openChatHistory": "Open chatgeschiedenis",
@@ -24,7 +24,7 @@
         "uploadedFilesLabel": "Eerder geüploade bestanden:",
         "noFilesUploaded": "Nog geen bestanden geüpload",
         "loading": "Laden...",
-        "manageFileUploads": "Bestandsuploads beheren",
+        "manageFileUploads": "Mijn Uploads",
         "uploadingFiles": "Bestanden uploaden...",
         "uploadedFileError": "Fout bij uploaden van bestand - probeer het opnieuw of neem contact op met de beheerder.",
         "deleteFile": "Bestand verwijderen",
@@ -37,10 +37,11 @@
     "chatEmptyStateTitle": "Chat met je gegevens",
     "chatEmptyStateSubtitle": "Stel een vraag of probeer een voorbeeld",
     "defaultExamples": {
-        "1": "Wat zit er in mijn Northwind Health Plus-pakket dat niet in het standaardpakket zit?",
-        "2": "Wat gebeurt er tijdens een functioneringsgesprek?",
-        "3": "Wat doet een Product Manager?",
-        "placeholder": "Typ een nieuwe vraag (bijv. dekt mijn pakket jaarlijkse oogonderzoeken?)"
+        "1": "Wat zijn de wettelijke taken van de Provincies?",
+        "2": "Welke instrumenten zijn er binnen de omgevingswet?",
+        "3": "Maak een samenvatting van deze tekst",
+        "4": "Brainstorm over een implementatieplan voor LAICA",
+        "placeholder": "Stel een nieuwe vraag"
     },
     "askTitle": "Stel je vraag aan de data",
     "gpt4vExamples": {
@@ -68,8 +69,8 @@
 
     "headerTexts": {
         "thoughtProcess": "Denkproces",
-        "supportingContent": "Ondersteunende Inhoud",
-        "citation": "Citaat"
+        "supportingContent": "Citaten",
+        "citation": "Bron"
     },
 
     "labels": {

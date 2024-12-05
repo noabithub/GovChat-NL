@@ -119,10 +119,10 @@ class UploadUserFileStrategy:
         self.search_info = search_info
         self.search_manager = SearchManager(self.search_info, None, True, False, self.embeddings)
 
-    async def add_file(self, file: File):
+    async def add_file(self, file: File, category: Optional[str] = None):
         if self.image_embeddings:
             logging.warning("Image embeddings are not currently supported for the user upload feature")
-        sections = await parse_file(file, self.file_processors)
+        sections = await parse_file(file, self.file_processors, category)
         if sections:
             await self.search_manager.update_content(sections, url=file.url)
 

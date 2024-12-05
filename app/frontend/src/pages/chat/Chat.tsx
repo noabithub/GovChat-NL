@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
-import { Panel, DefaultButton } from "@fluentui/react";
-import { SparkleFilled } from "@fluentui/react-icons";
+import { Panel, DefaultButton, IconButton } from "@fluentui/react";
 import readNDJSONStream from "ndjson-readablestream";
 
 import styles from "./Chat.module.css";
@@ -36,6 +35,12 @@ import { TokenClaimsDisplay } from "../../components/TokenClaimsDisplay";
 import { LoginContext } from "../../loginContext";
 import { LanguagePicker } from "../../i18n/LanguagePicker";
 import { Settings } from "../../components/Settings/Settings";
+import { AppLauncherButton } from "../../components/AppLauncherButton";
+import { AppLauncherOverlay } from "../../components/AppLauncherOverlay/AppLauncherOverlay";
+import { InfoButton } from "../../components/InfoButton";
+import { InfoOverlay } from "../../components/InfoOverlay";
+import { IncludeCategoryButton } from "../../components/IncludeCategoryButton/IncludeCategoryButton";
+import logoSvg from "../../assets/provincie-logo-vierkant.svg";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -50,7 +55,7 @@ const Chat = () => {
     const [useSemanticRanker, setUseSemanticRanker] = useState<boolean>(true);
     const [shouldStream, setShouldStream] = useState<boolean>(true);
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
-    const [includeCategory, setIncludeCategory] = useState<string>("");
+    // const [includeCategory, setIncludeCategory] = useState<string>("");
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
     const [vectorFieldList, setVectorFieldList] = useState<VectorFieldOptions[]>([VectorFieldOptions.Embedding]);
@@ -58,6 +63,9 @@ const Chat = () => {
     const [useGroupsSecurityFilter, setUseGroupsSecurityFilter] = useState<boolean>(false);
     const [gpt4vInput, setGPT4VInput] = useState<GPT4VInput>(GPT4VInput.TextAndImages);
     const [useGPT4V, setUseGPT4V] = useState<boolean>(false);
+    const [isAppLauncherOpen, setIsAppLauncherOpen] = useState<boolean>(false);
+    const [isInfoOverlayOpen, setIsInfoOverlayOpen] = useState<boolean>(false);
+    const [includeCategory, setIncludeCategory] = useState("__NONE__");
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -354,28 +362,36 @@ const Chat = () => {
             <Helmet>
                 <title>{t("pageTitle")}</title>
             </Helmet>
-            <div className={styles.commandsSplitContainer}>
+            <div className={styles.commandsSplitContainer} style={{ marginLeft: isHistoryPanelOpen ? "300px" : "0" }}>
                 <div className={styles.commandsContainer}>
                     {((useLogin && showChatHistoryCosmos) || showChatHistoryBrowser) && (
                         <HistoryButton className={styles.commandButton} onClick={() => setIsHistoryPanelOpen(!isHistoryPanelOpen)} />
                     )}
+                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                 </div>
                 <div className={styles.commandsContainer}>
-                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                    <AppLauncherButton className={styles.commandButton} onClick={() => setIsAppLauncherOpen(true)} />
+                </div>
+                <div className={styles.commandsContainer}>
                     {showUserUpload && <UploadFile className={styles.commandButton} disabled={!loggedIn} />}
-                    <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
+                    <IncludeCategoryButton includeCategory={includeCategory} onChange={setIncludeCategory} />
+                    <InfoButton className={styles.commandButton} onClick={() => setIsInfoOverlayOpen(true)} />
+                    {/* <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} /> */}
                 </div>
             </div>
             <div className={styles.chatRoot} style={{ marginLeft: isHistoryPanelOpen ? "300px" : "0" }}>
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
-                            <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
-                            <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
-                            {showLanguagePicker && <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />}
-
-                            <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
+                            <div className={styles.chatEmptyStateHeader}>
+                                <img src={logoSvg} alt="Provincie logo" style={{ width: "120px", height: "120px", marginBottom: "2rem" }} aria-hidden="true" />
+                                <h1 className={styles.chatEmptyStateTitle}>Limburgse AI Chat Assistent (LAICA)</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>Jouw veilige kennisassistent voor de Provincie Limburg</h2>
+                            </div>
+                            <div className={styles.chatEmptyStateContent}>
+                                {showLanguagePicker && <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />}
+                                <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
+                            </div>
                         </div>
                     ) : (
                         <div className={styles.chatMessageStream}>
@@ -464,6 +480,7 @@ const Chat = () => {
                         citationHeight="810px"
                         answer={answers[selectedAnswer][1]}
                         activeTab={activeAnalysisPanelTab}
+                        onClose={() => setActiveAnalysisPanelTab(undefined)}
                     />
                 )}
 
@@ -521,6 +538,10 @@ const Chat = () => {
                     {useLogin && <TokenClaimsDisplay />}
                 </Panel>
             </div>
+            <AppLauncherOverlay isOpen={isAppLauncherOpen} onClose={() => setIsAppLauncherOpen(false)} />
+            <InfoOverlay isOpen={isInfoOverlayOpen} onClose={() => setIsInfoOverlayOpen(false)} />
+
+            <div className={styles.disclaimerText}>LAICA kan fouten maken. Je blijft zelf verantwoordelijk voor je eigen werk.</div>
         </div>
     );
 };

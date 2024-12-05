@@ -1,4 +1,4 @@
-import { Delete24Regular } from "@fluentui/react-icons";
+import { Chat24Regular } from "@fluentui/react-icons";
 import { Button } from "@fluentui/react-components";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +14,7 @@ export const ClearChatButton = ({ className, disabled, onClick }: Props) => {
     const { t, i18n } = useTranslation();
     return (
         <div className={`${styles.container} ${className ?? ""}`}>
-            <Button icon={<Delete24Regular />} disabled={disabled} onClick={onClick}>
+            <Button icon={<Chat24Regular />} disabled={disabled} onClick={onClick}>
                 {t("clearChat")}
             </Button>
         </div>

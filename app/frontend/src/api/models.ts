@@ -106,6 +106,11 @@ export interface SpeechConfig {
     setIsPlaying: (isPlaying: boolean) => void;
 }
 
+export interface ReadFileResult {
+    original_content: string;
+    simplified_content: string;
+}
+
 export type HistoryListApiResponse = {
     items: {
         id: string;

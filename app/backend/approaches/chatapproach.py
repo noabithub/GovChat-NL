@@ -9,31 +9,13 @@ from approaches.approach import Approach
 
 
 class ChatApproach(Approach, ABC):
-    query_prompt_few_shots: list[ChatCompletionMessageParam] = [
-        {"role": "user", "content": "How did crypto do last year?"},
-        {"role": "assistant", "content": "Summarize Cryptocurrency Market Dynamics from last year"},
-        {"role": "user", "content": "What are my health plans?"},
-        {"role": "assistant", "content": "Show available health plans"},
-    ]
-    NO_RESPONSE = "0"
-
-    follow_up_questions_prompt_content = """Generate 3 very brief follow-up questions that the user would likely ask next.
-    Enclose the follow-up questions in double angle brackets. Example:
-    <<Are there exclusions for prescriptions?>>
-    <<Which pharmacies can be ordered from?>>
-    <<What is the limit for over-the-counter medication?>>
-    Do no repeat questions that have already been asked.
-    Make sure the last question ends with ">>".
-    """
-
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base.
-    You have access to Azure AI Search index with 100's of documents.
-    Generate a search query based on the conversation and the new question.
-    Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-    Do not include any text inside [] or <<>> in the search query terms.
-    Do not include any special characters like '+'.
-    If the question is not in English, translate the question to English before generating the search query.
-    If you cannot generate a search query, return just the number 0.
+    follow_up_questions_prompt_content = """Genereer 3 zeer korte vervolgvraagstellingen die de gebruiker waarschijnlijk als volgende zou stellen.
+    Sluit de vervolgvraagstellingen in dubbele hoekhaken. Voorbeeld:
+    <<Zijn er uitzonderingen voor subsidies?>>
+    <<Welke stappen zijn nodig voor een vergunningaanvraag?>>
+    <<Hoe lang duurt het om een besluit te krijgen?>>
+    Herhaal geen vragen die al gesteld zijn.
+    Zorg ervoor dat de laatste vraag eindigt met ">>".
     """
 
     @property
@@ -45,35 +27,26 @@ class ChatApproach(Approach, ABC):
     async def run_until_final_call(self, messages, overrides, auth_claims, should_stream) -> tuple:
         pass
 
-    def get_system_prompt(self, override_prompt: Optional[str], follow_up_questions_prompt: str) -> str:
+    def get_system_prompt(
+        self, override_prompt: Optional[str], follow_up_questions_prompt: str, sources_reference_content: str = ""
+    ) -> str:
         if override_prompt is None:
             return self.system_message_chat_conversation.format(
-                injected_prompt="", follow_up_questions_prompt=follow_up_questions_prompt
+                injected_prompt="",
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                sources_reference_content=sources_reference_content,
             )
         elif override_prompt.startswith(">>>"):
             return self.system_message_chat_conversation.format(
-                injected_prompt=override_prompt[3:] + "\n", follow_up_questions_prompt=follow_up_questions_prompt
+                injected_prompt=override_prompt[3:] + "\n",
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                sources_reference_content=sources_reference_content,
             )
         else:
-            return override_prompt.format(follow_up_questions_prompt=follow_up_questions_prompt)
-
-    def get_search_query(self, chat_completion: ChatCompletion, user_query: str):
-        response_message = chat_completion.choices[0].message
-
-        if response_message.tool_calls:
-            for tool in response_message.tool_calls:
-                if tool.type != "function":
-                    continue
-                function = tool.function
-                if function.name == "search_sources":
-                    arg = json.loads(function.arguments)
-                    search_query = arg.get("search_query", self.NO_RESPONSE)
-                    if search_query != self.NO_RESPONSE:
-                        return search_query
-        elif query_text := response_message.content:
-            if query_text.strip() != self.NO_RESPONSE:
-                return query_text
-        return user_query
+            return override_prompt.format(
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                sources_reference_content=sources_reference_content,
+            )
 
     def extract_followup_questions(self, content: Optional[str]):
         if content is None:

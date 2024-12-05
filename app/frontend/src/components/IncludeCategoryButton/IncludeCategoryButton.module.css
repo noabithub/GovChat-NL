@@ -1,0 +1,26 @@
+.dropdownContainer {
+    margin-bottom: 10px;
+}
+
+.dropdown {
+    width: 175px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+}
+
+.dropdown:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown:focus {
+    background-color: transparent;
+}
+
+.title {
+    background-color: transparent;
+    color: #333;
+}
+
+.caretDown {
+    color: #333;
+}

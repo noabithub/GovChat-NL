@@ -6,7 +6,7 @@ import styles from "./Answer.module.css";
 import { AnswerIcon } from "./AnswerIcon";
 
 export const AnswerLoading = () => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const animatedStyles = useSpring({
         from: { opacity: 0 },
         to: { opacity: 1 }

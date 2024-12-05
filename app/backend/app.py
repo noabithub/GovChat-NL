@@ -20,6 +20,7 @@ from azure.identity.aio import (
     AzureDeveloperCliCredential,
     ManagedIdentityCredential,
     get_bearer_token_provider,
+    DefaultAzureCredential,
 )
 from azure.monitor.opentelemetry import configure_azure_monitor
 from azure.search.documents.aio import SearchClient
@@ -371,7 +372,9 @@ async def upload(auth_claims: dict[str, Any]):
     await file_client.upload_data(file_io, overwrite=True, metadata={"UploadedBy": user_oid})
     file_io.seek(0)
     ingester: UploadUserFileStrategy = current_app.config[CONFIG_INGESTER]
-    await ingester.add_file(File(content=file_io, acls={"oids": [user_oid]}, url=file_client.url))
+    await ingester.add_file(
+        File(content=file_io, acls={"oids": [user_oid]}, url=file_client.url), category="user_upload"
+    )
     return jsonify({"message": "File uploaded successfully"}), 200
 
 
@@ -404,6 +407,67 @@ async def list_uploaded(auth_claims: dict[str, Any]):
         if error.status_code != 404:
             current_app.logger.exception("Error listing uploaded files", error)
     return jsonify(files), 200
+
+
+@bp.route("/b1_upload", methods=["POST"])
+@authenticated
+async def read_file(auth_claims: dict[str, Any]):
+    current_app.logger.info("Received request to /b1_upload")
+    try:
+        files = await request.files
+        if "file" not in files:
+            current_app.logger.error("No file part in the request")
+            return jsonify({"error": "No file part"}), 400
+
+        file = files["file"]
+        if file.filename == "":
+            current_app.logger.error("No selected file")
+            return jsonify({"error": "No selected file"}), 400
+
+        current_app.logger.info(f"Processing file: {file.filename}")
+
+        azure_credential = DefaultAzureCredential()
+        file_processors = setup_file_processors(
+            azure_credential=azure_credential,
+            document_intelligence_service=os.getenv("AZURE_DOCUMENTINTELLIGENCE_SERVICE"),
+            local_pdf_parser=os.getenv("USE_LOCAL_PDF_PARSER", "").lower() == "true",
+            local_html_parser=os.getenv("USE_LOCAL_HTML_PARSER", "").lower() == "true",
+            search_images=False,
+        )
+        current_app.logger.info(f"File processors set up: {list(file_processors.keys())}")
+
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if file_extension in file_processors:
+            processor = file_processors[file_extension]
+            current_app.logger.info(f"Processing file with {processor.__class__.__name__}")
+
+            # Lees de inhoud van het bestand (zonder await)
+            file_content = file.read()
+
+            # Maak een BytesIO object van de inhoud
+            file_io = io.BytesIO(file_content)
+            file_io.name = file.filename
+
+            # Parse het bestand
+            pages = [page async for page in processor.parser.parse(file_io)]
+            split_pages = list(processor.splitter.split_pages(pages))
+
+            # Combineer alle split pages in één tekst
+            text_content = "\n".join(sp.text for sp in split_pages)
+
+            current_app.logger.info("File processed successfully")
+
+            return (
+                jsonify({"original_content": text_content, "simplified_content": "Moet nog geimplementeerd worden."}),
+                200,
+            )
+        else:
+            current_app.logger.error(f"Unsupported file type: {file_extension}")
+            return jsonify({"error": "Unsupported file type"}), 400
+
+    except Exception as e:
+        current_app.logger.exception(f"Error in /b1_upload: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 @bp.before_app_serving
@@ -728,6 +792,8 @@ async def close_clients():
 
 
 def create_app():
+    print(f"Version: 1.8")
+
     app = Quart(__name__)
     app.register_blueprint(bp)
     app.register_blueprint(chat_history_cosmosdb_bp)
