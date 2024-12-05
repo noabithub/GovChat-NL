@@ -17,6 +17,25 @@ urlFragment: azure-search-openai-demo
 ---
 -->
 
+# GovChat-NL
+
+## Overzicht
+
+GovChat-NL is een initiatief van de Provincie Limburg en wordt uitgevoerd binnen het Interprovinciaal Overleg Data Science (PODS). Het project is een Nederlandse overheidsgerichte fork van de [azure-search-openai-demo](https://github.com/azure-samples/azure-search-openai-demo) en integreert ChatGPT-achtige vraag-en-antwoordfunctionaliteit met een app launcher voor toepassingen die gebruikmaken van Large Language Models (LLM). Dit is ontworpen voor veilig en gedeeld gebruik binnen de publieke sector.
+
+## Filosofie
+
+Het project streeft ernaar om een ecosysteem te creëren voor AI-toepassingen dat flexibel en toegankelijk is voor verschillende overheidsinstanties. Dankzij de Infrastructure-as-Code aanpak kunnen organisaties eenvoudig aanhaken en deelnemen aan de ontwikkeling. Momenteel is de infrastructuur gebaseerd op Microsoft Azure, maar het voornemen is om de verschillende componenten van de applicatie bij diverse leveranciers af te kunnen nemen. Dit biedt flexibiliteit en keuzevrijheid binnen het ecosysteem van AI-toepassingen.
+
+## Projecttab: GovChatNL-DevPath
+
+Het projecttabblad "GovChatNL-DevPath" verdeelt taken over verschillende deelnemende overheden, maar staat ook open voor bijdragen van niet-overheidsorganisaties. Dit bevordert een gestructureerde samenwerking en maakt het mogelijk voor diverse partijen om bij te dragen aan de ontwikkeling van innovatieve AI-oplossingen.
+
+## Bijdragen
+
+We nodigen ontwikkelaars, onderzoekers en andere belanghebbenden uit om bij te dragen aan GovChat-NL. Of je nu een overheidsinstantie bent of een externe partner, je bijdrage is welkom om de toekomst van AI in de publieke sector vorm te geven.
+
+
 # RAG chat app with Azure OpenAI and Azure AI Search (Python)
 
 This solution creates a ChatGPT-like frontend experience over your own documents using RAG (Retrieval Augmented Generation). It uses Azure OpenAI Service to access GPT models, and Azure AI Search for data indexing and retrieval.
